@@ -1,3 +1,3 @@
-Hello world! 
+Hello world! This is Thomas Hess speaking. I am a bio major and I like bears.
 
-I am a bio major and data science minor! I am glad to be participating in your class this semester!
+![](C:\Users\Cryptopidae\Downloads\Wavingbear.gif)
