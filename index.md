@@ -1,4 +1,4 @@
-Lab01
+#Lab01
 
 import numpy as np
 import pandas as pd
@@ -13,7 +13,6 @@ The Data is represented as 21 as shown below. Examples include Sophmore 12 and S
 
 imputing_configuration = SimpleImputer(missing_values = np.nan, strategy = 'median')
 imp = imputing_configuration.fit(data[["Age"]])
-# The following replaces the NaNs in the "Funds" column with the mean value
 data[["Age"]] = imp.transform(data[["Age"]]).ravel()
 
 data.loc[12]
@@ -69,7 +68,6 @@ import matplotlib.pyplot as plt
 
 doors = ["goat","goat","goat","car"]
 
-# approximated results
 switch_win_probability = []
 stick_win_probability = []
 
