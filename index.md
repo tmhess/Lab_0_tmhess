@@ -1,1 +1,1 @@
-Hello world! This is Thomas Hess speaking. I am a bio major and I like bears.
+Hello world! This is Thomas Hess speaking. I am a bio major and I like bears. And cats too!
