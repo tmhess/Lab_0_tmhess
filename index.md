@@ -277,7 +277,7 @@ plt.show()
 
 Which of the following forms is not  linear in the weights? From lecture 10:
 
-## <font color='navy'>Linear vs Non-linear models</font>
+<font color='navy'>Linear vs Non-linear models</font>
 
 This is a linear model in terms of the weights $\beta$: 
 
