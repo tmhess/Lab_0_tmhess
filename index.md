@@ -360,7 +360,7 @@ $$
 
 - Main Idea: minimize the sum of the square residuals plus a constraint on the vector of weights
 
-**Therefore first one*
+**Therefore first one**
 
 **Q2**
 
