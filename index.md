@@ -439,7 +439,7 @@ rmse = np.sqrt(mean_squared_error(y,y_poly_pred))
 r2 = r2_score(y,y_poly_pred)
 print(rmse)
 
-Output: 4.679191295697281
+**Output: 4.679191295697281**
 
 **Q7**
 
@@ -467,7 +467,7 @@ for train_index, test_index in Q7kf.split(Q7df):
 print('The k-fold crossvalidated error rate on the train sets is: ' + str(np.mean(PE_train)))
 print('The k-fold crossvalidated error rate on the test sets is: ' + str(np.mean(PE)))
 
-The k-fold crossvalidated error rate on the test sets is: 24.742480813910557
+**The k-fold crossvalidated error rate on the test sets is: 24.742480813910557**
 
 **Q8**
 
@@ -495,7 +495,7 @@ for train_index, test_index in Q8kf.split(Q8df):
 print('The k-fold crossvalidated error rate on the train sets is: ' + str(np.mean(PE_train)))
 print('The k-fold crossvalidated error rate on the test sets is: ' + str(np.mean(PE)))
 
-The k-fold crossvalidated error rate on the train sets is: 22.68329398863849
+**The k-fold crossvalidated error rate on the train sets is: 22.68329398863849**
 
 **Q9**
 
@@ -519,7 +519,7 @@ Q9rmse = np.sqrt(mean_squared_error(Q9y,Q9y_poly_pred))
 Q9r2 = r2_score(Q9y,Q9y_poly_pred)
 print(Q9rmse)
 
-Output: 2.449087064744557
+**Output: 2.449087064744557**
 
 **Q10**
 
