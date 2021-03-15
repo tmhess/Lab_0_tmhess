@@ -351,3 +351,206 @@ $$
 $$
 
 **Therefore it is the second answer.**
+
+# Lab 03
+
+**Q1**
+
+- A solution for rank defficient Multiple Linear Regression: Regularization
+
+- Main Idea: minimize the sum of the square residuals plus a constraint on the vector of weights
+
+**Therefore first one*
+
+**Q2**
+
+- This is an example of rank deficency.
+
+- The more features there are the lower the mse for the OLS is.
+
+- Whereas for L2, this is solved for by adding the weights. 
+
+**Therefore true**
+
+**Q3** 
+
+L1 is a Euclidean norm. Therefore we need to compare the differences of these two.
+
+The sum of the adjacent plus the opisite ends of a triangle is never less then the hypoteneus of a triangle. Another way to think of L1 is as the taxicab distance.
+
+**Therefore false**
+
+**Q4**
+
+- The first option uses L1 which is commonly used for Lasso regularization, so not typical. Therefore this is not the answer.
+
+- The second option is about elastic net. Therefore this is not the answer.
+
+- I don't remember division being in any of the regularization formulas. Therefore this is not the answer.
+
+- From lecture, the main idea of regularization is to minimize the sum of the square residuals plus a constraint on the vector of weights (aka coefficients) **This is my choice**
+
+**Q5**
+
+- Not polynomial regression since this only plots out the line of a polynomial through the data. Nothing should be estimated as 0.
+
+- Not OLS since this is the sum of square residuals. Under some conditions C is 0 but only sometimes. Therefore this is not the answer.
+
+- It is lasso due to the existance of the absolute value sign making it very likely for it to be set to 0. **This is my choice**
+
+- It is not ridge since the coefficent is squared. Therefore this is not the answer.
+
+**Q6**
+
+import pandas as pd
+import operator
+import numpy as np
+
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import Ridge
+#from yellowbrick.regressor import ResidualsPlot
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn import linear_model
+from sklearn.linear_model import Ridge, Lasso, ElasticNet, LinearRegression
+from sklearn import datasets
+from sklearn.model_selection import KFold # import KFold
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import mean_squared_error as MSE
+import seaborn as sns
+from scipy import stats
+from scipy.stats import norm
+
+data = datasets.load_boston()
+df = pd.DataFrame(data=data.data, columns=data.feature_names)
+y = data.target
+x = data.data
+
+from sklearn.preprocessing import StandardScaler
+scale = StandardScaler()
+Xs_train = scale.fit_transform(x)
+
+model = LinearRegression()
+model.fit(Xs_train, y)
+y_poly_pred = model.predict(Xs_train)
+
+rmse = np.sqrt(mean_squared_error(y,y_poly_pred))
+r2 = r2_score(y,y_poly_pred)
+print(rmse)
+
+Output: 4.679191295697281
+
+**Q7**
+
+Q7data = datasets.load_boston()
+Q7df = pd.DataFrame(data=Q7data.data, columns=Q7data.feature_names)
+Q7y = Q7data.target
+
+Q7kf = KFold(n_splits=10, random_state=1234,shuffle=True)
+
+i = 0
+PE = []
+PE_train = []
+model = Lasso(alpha=0.03)
+for train_index, test_index in Q7kf.split(Q7df):
+    X_train = Q7df.values[train_index]
+    y_train = Q7y[train_index]
+    X_test = Q7df.values[test_index]
+    y_test = Q7y[test_index]
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    y_pred_train = model.predict(X_train)
+    PE_train.append(MSE(y_train,y_pred_train))
+    PE.append(MSE(y_test, y_pred))
+
+print('The k-fold crossvalidated error rate on the train sets is: ' + str(np.mean(PE_train)))
+print('The k-fold crossvalidated error rate on the test sets is: ' + str(np.mean(PE)))
+
+The k-fold crossvalidated error rate on the test sets is: 24.742480813910557
+
+**Q8**
+
+Q8data = datasets.load_boston()
+Q8df = pd.DataFrame(data=Q8data.data, columns=Q8data.feature_names)
+Q8y = Q8data.target
+
+Q8kf = KFold(n_splits=10, random_state=1234,shuffle=True)
+
+i = 0
+PE = []
+PE_train = []
+model = model = ElasticNet(alpha=0.05,l1_ratio=0.9)
+for train_index, test_index in Q8kf.split(Q8df):
+    X_train = Q8df.values[train_index]
+    y_train = Q8y[train_index]
+    X_test = Q8df.values[test_index]
+    y_test = Q8y[test_index]
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    y_pred_train = model.predict(X_train)
+    PE_train.append(MSE(y_train,y_pred_train))
+    PE.append(MSE(y_test, y_pred))
+
+print('The k-fold crossvalidated error rate on the train sets is: ' + str(np.mean(PE_train)))
+print('The k-fold crossvalidated error rate on the test sets is: ' + str(np.mean(PE)))
+
+The k-fold crossvalidated error rate on the train sets is: 22.68329398863849
+
+**Q9**
+
+Q9data = datasets.load_boston()
+Q9df = pd.DataFrame(data=Q9data.data, columns=Q9data.feature_names)
+Q9y = Q9data.target
+Q9x = Q9data.data
+
+from sklearn.preprocessing import StandardScaler
+scale = StandardScaler()
+Q9Xs_train = scale.fit_transform(Q9x)
+
+Q9polynomial_features = PolynomialFeatures(degree=2)
+Q9x_poly = Q9polynomial_features.fit_transform(Q9Xs_train)
+
+model = LinearRegression()
+model.fit(Q9x_poly, Q9y)
+Q9y_poly_pred = model.predict(Q9x_poly)
+
+Q9rmse = np.sqrt(mean_squared_error(Q9y,Q9y_poly_pred))
+Q9r2 = r2_score(Q9y,Q9y_poly_pred)
+print(Q9rmse)
+
+Output: 2.449087064744557
+
+**Q10**
+
+data = datasets.load_boston()
+df = pd.DataFrame(data=data.data, columns=data.feature_names)
+y = data.target
+x = data.data
+
+polynomial_features = PolynomialFeatures(degree=2)
+x_poly = polynomial_features.fit_transform(x)
+
+model = Ridge(alpha=0.1)
+model.fit(x_poly, y)
+y_poly_pred = model.predict(x_poly)
+
+residuals = (y - y_poly_pred)
+
+ax1 = sns.distplot(residuals,
+                                        
+                  bins=11,
+                  kde=False,
+                  color='deepskyblue',
+                  hist_kws={"color":'lightpink'},
+                  fit=stats.norm,
+                  fit_kws={"color":'deepskyblue'})
+ax1.set(xlabel='Residuals', ylabel='Frequency')
+
+![Screenshot 2021-03-14 222042](https://user-images.githubusercontent.com/78627324/111095313-8a886700-8513-11eb-86ab-927dc37639ea.png)
+
+stat, p = stats.shapiro(residuals)
+print('The p-value is: '+str(p))
+
+The p-value is: 5.911846966827339e-12
+
