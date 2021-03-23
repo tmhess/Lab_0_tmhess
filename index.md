@@ -556,3 +556,224 @@ print('The p-value is: '+str(p))
 
 The p-value is: 5.911846966827339e-12
 
+# Midterm Lab
+
+**Q1**
+
+import numpy as np
+import pandas as pd
+from sklearn.impute import SimpleImputer
+data = pd.read_csv("../../Data310/Sample_Data/weatherHistory.csv")
+
+from sklearn.linear_model import LinearRegression
+from sklearn import linear_model
+from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.linear_model import Ridge, Lasso, ElasticNet, LinearRegression
+from sklearn.model_selection import KFold # import KFold
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import mean_squared_error as MSE
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.preprocessing import PolynomialFeatures
+import matplotlib.pyplot as plt
+
+**There are 12 observations**
+
+**Q2**
+
+Types of Data
+
+- Data could be classified based on the levels of measurement, such as nominal, ordinal, interval and ratio.
+- Nominal data: unique identifiers but order does not matter for example, peoples' names, names of flowers, colors etc.
+- Ordinal data: unique indentifiers and order matters, such as in letter grades, military or administration ranks, etc.
+- Interval level of measurement: numerical values where differences make sense in the context of using them but ratios or proportions could be meaningless, such as temperatures, heights of people, days in the calendar.
+- Ratio level of measurement: numerical values, that are at the interval level of measurement and also the ratio and proportions make sense in the context of using them, such as salaries, weights, distances, forces, etc. 
+
+**There are 3 nominal variables: Summary Precip Type and daily summary**
+
+**Q3**
+
+y3 = data['Temperature (C)'].values
+x3 = data['Humidity'].values
+
+model = LinearRegression()
+model.fit(x3.reshape(-1,1), y3)
+
+y_pred = model.predict(x3.reshape(-1,1))
+
+np.sqrt(MSE(y3,y_pred))
+
+**Q4**
+
+data4 = data[['Humidity']]
+y4 = data['Temperature (C)'].values
+x4 = data['Humidity'].values
+kf4 = KFold(n_splits=20, random_state=2020,shuffle=True)
+scale = StandardScaler()
+data4s = scale.fit_transform(data4)
+
+i = 0
+PE = []
+PE_train = []
+model4 = Ridge(alpha=0.1)
+for train_index, test_index in kf4.split(data4):
+    X_train = data4s[train_index]
+    y_train = y4[train_index]
+    X_test = data4s[test_index]
+    y_test = y4[test_index].reshape(-1, 1)
+    model4.fit(X_train.reshape(-1, 1), y_train)
+    y_pred = model4.predict(X_test.reshape(-1, 1))
+    y_pred_train = model4.predict(X_train.reshape(-1, 1))
+    PE_train.append(np.sqrt(MSE(y_train,y_pred_train)))
+    PE.append(np.sqrt(MSE(y_test, y_pred)))
+
+print('The k-fold crossvalidated error rate on the train sets is: ' + str(np.mean(PE_train)))
+print('The k-fold crossvalidated error rate on the test sets is: ' + str(np.mean(PE)))
+
+**7.4000070622435405**
+
+**Q5**
+
+data5 = data[['Temperature (C)', 'Humidity']]
+y5 = data['Temperature (C)']
+x5 = data['Humidity']
+kf5 = KFold(n_splits=10, random_state=1693,shuffle=True)
+RF_reg = RandomForestRegressor(n_estimators=100,max_depth=50)
+
+i = 0
+PE = []
+PE_train = []
+model5 = RF_reg
+for train_index, test_index in kf5.split(data5):
+    X_train = x5.values[train_index]
+    y_train = y5[train_index]
+    X_test = x5.values[test_index]
+    y_test = y5[test_index]
+    model5.fit(X_train.reshape(-1, 1), y_train)
+    y_pred = model5.predict(X_test.reshape(-1, 1))
+    y_pred_train = model5.predict(X_train.reshape(-1, 1))
+    PE_train.append(np.sqrt(MSE(y_train,y_pred_train)))
+    PE.append(np.sqrt(MSE(y_test, y_pred)))
+
+print('The k-fold crossvalidated error rate on the train sets is: ' + str(np.mean(PE_train)))
+print('The k-fold crossvalidated error rate on the test sets is: ' + str(np.mean(PE)))
+
+**Q6**
+data6 = data[['Temperature (C)', 'Humidity']]
+y6 = data['Temperature (C)'].values
+x6 = data['Humidity'].values
+kf6 = KFold(n_splits=10, random_state=1693,shuffle=True)
+scale = StandardScaler()
+Q6Xs_train = scale.fit_transform(x6.reshape(-1, 1))
+Q6polynomial_features = PolynomialFeatures(degree=6)
+data6_poly = Q6polynomial_features.fit_transform(data6)
+
+i = 0
+MSE_train = []
+MSE_test = []
+model6 = LinearRegression()
+for train_index, test_index in kf6.split(data6):
+    X_train = data6.values[train_index]
+    y_train = y6[train_index]
+    X_test = data6.values[test_index]
+    y_test = y6[test_index]
+    x_poly_train = Q6polynomial_features.fit_transform(np.array(X_train))
+    x_poly_test = Q6polynomial_features.fit_transform(np.array(X_test))
+    model6.fit(x_poly_train, y_train)
+    yhat_train = model6.predict(x_poly_train)
+    yhat_test = model6.predict(x_poly_test)
+    MSE_train.append(np.sqrt(mean_squared_error(y_train,yhat_train)))
+    MSE_test.append(np.sqrt(mean_squared_error(y_test,yhat_test)))
+    
+print('The k-fold crossvalidated error rate on the train sets is: ' + str(np.mean(MSE_train)))
+print('The k-fold crossvalidated error rate on the test sets is: ' + str(np.mean(MSE_test)))
+
+**~7.40**
+
+**Q7**
+data7 = data[['Humidity']]
+y7 = data['Temperature (C)']
+x7 = data['Humidity']
+kf7 = KFold(n_splits=10, random_state=1234,shuffle=True)
+scale = StandardScaler()
+data7s = scale.fit_transform(data7)
+
+i = 0
+PE = []
+PE_train = []
+model7 = Ridge(alpha=0.1)
+for train_index, test_index in kf7.split(data7s):
+    X_train = data7.values[train_index]
+    y_train = y7.values[train_index].reshape(-1, 1)
+    X_test = data7.values[test_index]
+    y_test = y7.values[test_index]
+    model7.fit(X_train.reshape(-1, 1), y_train)
+    y_pred = model7.predict(X_test.reshape(-1, 1))
+    y_pred_train = model7.predict(X_train.reshape(-1, 1))
+    PE_train.append(np.sqrt(MSE(y_train,y_pred_train)))
+    PE.append(np.sqrt(MSE(y_test, y_pred)))
+
+print('The k-fold crossvalidated error rate on the train sets is: ' + str(np.mean(PE_train)))
+print('The k-fold crossvalidated error rate on the test sets is: ' + str(np.mean(PE)))
+
+**7.4001**
+
+**Q8**
+
+data8 = data[['Humidity', 'Wind Speed (km/h)', 'Pressure (millibars)', 'Wind Bearing (degrees)']]
+y8 = data['Temperature (C)']
+x8 = data[['Humidity', 'Wind Speed (km/h)', 'Pressure (millibars)', 'Wind Bearing (degrees)']].values
+kf8 = KFold(n_splits=10, random_state=1234,shuffle=True)
+Q8polynomial_features = PolynomialFeatures(degree=6)
+data8_poly = Q8polynomial_features.fit_transform(data8)
+
+i = 0
+PE = []
+PE_train = []
+model8 = Ridge(alpha=0.1)
+for train_index, test_index in kf8.split(data8_poly):
+    X_train = Q8polynomial_features.fit_transform(x8[train_index])
+    y_train = y8.values[train_index]
+    X_test = Q8polynomial_features.fit_transform(x8[test_index])
+    y_test = y8.values[test_index]
+    model8.fit(X_train, y_train)
+    y_pred = model8.predict(X_test)
+    y_pred_train = model8.predict(X_train)
+    PE_train.append(np.sqrt(MSE(y_train,y_pred_train)))
+    PE.append(np.sqrt(MSE(y_test, y_pred)))
+
+print('The k-fold crossvalidated error rate on the train sets is: ' + str(np.mean(PE_train)))
+print('The k-fold crossvalidated error rate on the test sets is: ' + str(np.mean(PE)))
+
+**Q9**
+data9 = data[['Humidity', 'Wind Speed (km/h)', 'Pressure (millibars)', 'Wind Bearing (degrees)']]
+y9 = data['Temperature (C)']
+x9 = data[['Humidity', 'Wind Speed (km/h)', 'Pressure (millibars)', 'Wind Bearing (degrees)']]
+kf9 = KFold(n_splits=10, random_state=1234,shuffle=True)
+
+RF_reg = RandomForestRegressor(n_estimators=100,max_depth=50)
+i = 0
+PE = []
+PE_train = []
+model9 = RF_reg
+for train_index, test_index in kf9.split(data9):
+    X_train = x9.values[train_index]
+    y_train = y9[train_index]
+    X_test = x9.values[test_index]
+    y_test = y9[test_index]
+    model9.fit(X_train, y_train)
+    y_pred = model9.predict(X_test)
+    y_pred_train = model9.predict(X_train)
+    PE_train.append(np.sqrt(MSE(y_train,y_pred_train)))
+    PE.append(np.sqrt(MSE(y_test, y_pred)))
+
+print('The k-fold crossvalidated error rate on the train sets is: ' + str(np.mean(PE_train)))
+print('The k-fold crossvalidated error rate on the test sets is: ' + str(np.mean(PE)))
+
+**Q10**
+y10 = data['Temperature (C)']
+x10 = data['Humidity']
+fig, ax = plt.subplots(figsize=(10,8))
+ax.scatter(y10,x10)
+plt.show()
+
+![Screenshot 2021-03-23 173559](https://user-images.githubusercontent.com/78627324/112221798-41fd3780-8bfe-11eb-8084-2f54ce02b782.png)
