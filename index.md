@@ -800,7 +800,7 @@ datay = y.transpose()
 svm = SVC(kernel='rbf')
 svm.fit(x_train, y_train)
 svm.predict([[16.78,17.89]])
-#0 is malignant
+0 is malignant
 **array([0])**
 
 **Q7**
@@ -821,7 +821,7 @@ n_neighbors = 5
 knn = KNN(n_neighbors=5, weights='uniform')
 knn.fit(xscaledtrain, y_train)
 knn.predict([[17.18,8.65]])
-# 0 is malignant
+0 is malignant
 
 **array([0])**
 
