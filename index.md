@@ -63,9 +63,6 @@ This sounds true since in classs we have done examples were the closer the proba
 import matplotlib as mpl
 mpl.rcParams['figure.dpi'] = 150
 
-import random
-import matplotlib.pyplot as plt
-
 doors = ["goat","goat","goat","car"]
 
 switch_win_probability = []
@@ -145,18 +142,6 @@ Noise tends to be bad, so you do not want to correlate with it. Though this is j
 Additional notes:
 
 Look at lecture 10 for this problemfrom yellowbrick.regressor import ResidualsPlot
-
-import pandas as pd
-import operator
-import numpy as np
-
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import Ridge
-#from yellowbrick.regressor import ResidualsPlot
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_squared_error, r2_score
-from sklearn.preprocessing import PolynomialFeatures
-from sklearn import linear_model
 
 df = pd.read_csv('../../Data310/Sample_Data/L3Data.csv')
 y = df['Grade'].values
@@ -403,26 +388,6 @@ The sum of the adjacent plus the opisite ends of a triangle is never less then t
 - It is not ridge since the coefficent is squared. Therefore this is not the answer.
 
 **Q6**
-
-import pandas as pd
-import operator
-import numpy as np
-
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import Ridge
-#from yellowbrick.regressor import ResidualsPlot
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_squared_error, r2_score
-from sklearn.preprocessing import PolynomialFeatures
-from sklearn import linear_model
-from sklearn.linear_model import Ridge, Lasso, ElasticNet, LinearRegression
-from sklearn import datasets
-from sklearn.model_selection import KFold # import KFold
-from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import mean_squared_error as MSE
-import seaborn as sns
-from scipy import stats
-from scipy.stats import norm
 
 data = datasets.load_boston()
 df = pd.DataFrame(data=data.data, columns=data.feature_names)
@@ -777,3 +742,332 @@ ax.scatter(y10,x10)
 plt.show()
 
 ![Screenshot 2021-03-23 173559](https://user-images.githubusercontent.com/78627324/112221798-41fd3780-8bfe-11eb-8084-2f54ce02b782.png)
+
+# Lab 05
+
+**Q1**
+
+SVM classification, one or more landmark points.
+
+Evidence? 
+
+<figcaption>SVM with Radial Basis Function Kernel</figcaption></center>
+</figure>
+
+For this we would need at least one landmark point $x_0$. The following is also called a "Gaussian" kernel
+
+$$\Large
+(x,y) \rightarrow \left(x,y,z:=e^{-\gamma[(x-x_0)^2+(y-y_0)^2]}\right)
+$$
+
+**Q2**
+
+Therefore it is false, hardmargins can be overly sensitive to noise. This makes logical sense.
+
+**Q3**
+
+This is true, for k-nearest neighbors the number of neighbors makes a circle. For estimating a point, it is always estimated within the cirlce. The classification depends on the majority. Distance can become involved too.
+
+**Q4**
+
+dat = load_breast_cancer()
+df = pd.DataFrame(data=dat.data, columns=dat.feature_names)
+X = df[['mean radius', 'mean texture']]
+
+y = dat.target
+dat.target_names
+
+x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=1693)
+
+len(x_train)
+len(y_train)
+
+**426**
+
+**Q5**
+
+False since the next questions involve independent varaibles that are two. I think the minimum required is two for the hyperplane.
+
+**Q6**
+
+scale = StandardScaler()
+
+xscaled = scale.fit_transform(X)
+xscaledtrain = scale.fit_transform(x_train)
+datax = [[15.78,17.89]]
+datay = y.transpose()
+
+svm = SVC(kernel='rbf')
+svm.fit(x_train, y_train)
+svm.predict([[16.78,17.89]])
+#0 is malignant
+**array([0])**
+
+**Q7**
+
+model = LogisticRegression(solver='lbfgs')
+model.fit(xscaledtrain, y_train)
+prediction = model.predict(X)
+accuracy = accuracy_score(y, prediction)
+print(accuracy)
+
+**0.37258347978910367**
+
+**Q8**
+
+n_neighbors = 5
+#clf = neighbors.KNeighborsClassifier(n_neighbors)
+#clf.predict([[16.78,17.89]])
+knn = KNN(n_neighbors=5, weights='uniform')
+knn.fit(xscaledtrain, y_train)
+knn.predict([[17.18,8.65]])
+# 0 is malignant
+
+**array([0])**
+
+**Q9**
+
+model = RandomForestClassifier(random_state=1234, max_depth=5, n_estimators = 100)
+model.fit(X, y);
+predicted_classes = model.predict(X)
+accuracy = accuracy_score(y,predicted_classes)
+print(accuracy)
+
+from sklearn import svm, datasets
+from sklearn.metrics import auc
+from sklearn.metrics import plot_roc_curve
+from sklearn.model_selection import StratifiedKFold
+
+def validation(X,y,k,model):
+  PA_IV = []
+  PA_EV = []
+  pipe = Pipeline([('scale',scale),('Classifier',model)])
+  kf = KFold(n_splits=k,shuffle=True,random_state=1234)
+  for idxtrain, idxtest in kf.split(X):
+    X_train = X[idxtrain,:]
+    y_train = y[idxtrain]
+    X_test = X[idxtest,:]
+    y_test = y[idxtest]
+    pipe.fit(X_train,y_train)
+    PA_IV.append(accuracy_score(y_train,pipe.predict(X_train)))
+    PA_EV.append(accuracy_score(y_test,pipe.predict(X_test)))
+  return np.mean(PA_IV), np.mean(PA_EV)
+  
+  cv = StratifiedKFold(n_splits=10)
+classifier = RandomForestClassifier(random_state=1234, max_depth=5, n_estimators = 100)
+
+
+tprs = []
+aucs = []
+mean_fpr = np.linspace(0, 1, 100)
+
+for i, (train, test) in enumerate(cv.split(X, y)):
+    #classifier.fit(X[train], y[train])
+    interp_tpr = np.interp(mean_fpr, viz.fpr, viz.tpr)
+    interp_tpr[0] = 0.0
+    tprs.append(interp_tpr)
+    aucs.append(viz.roc_auc)
+
+mean_tpr = np.mean(tprs, axis=0)
+mean_tpr[-1] = 1.0
+mean_auc = auc(mean_fpr, mean_tpr)
+std_auc = np.std(aucs)
+
+**Q10**
+
+Problem #1: Predicted value is continuous, not probabilistic
+
+In a binary classification problem, what we are interested in is the probability of an outcome occurring. Probability is ranged between 0 and 1, where the probability of something certain to happen is 1, and 0 is something unlikely to happen. But in linear regression, we are predicting an absolute number, which can range outside 0 and 1.
+
+**Q11**
+
+Sometimes the data is not about the distances, instead it is about the majority. So in this case KNN would not have better results.
+
+# Lab 06
+
+**Q1**
+
+The maximum depth of the tree if none, then nodes are expanded until all leaves are pure or until all leaves contain less than min_samples_split samples.
+
+**True**
+
+**Q2**
+
+This is correct due to the creation of more complex decision boundries or ones that can be nonlinear.
+
+**True**
+
+**Q3**
+
+n_estimators are the number of trees in the forest. 
+
+**Q4**
+
+dat = load_breast_cancer()
+df = pd.DataFrame(data=dat.data, columns=dat.feature_names)
+X = df[['mean radius', 'mean texture']].values
+y = dat.target
+
+y = dat.target
+dat.target_names
+Xtrain,Xtest,ytrain,ytest= tts(X,y,test_size=0.25,random_state=1693)
+scaler=StandardScaler()
+Xtrain = scaler.fit_transform(Xtrain)
+Xtest = scaler.transform(Xtest)
+spc = dat.target_names
+
+**BAYESIAN TREE DOES NOT EXIST**
+
+dt_class = RandomForestClassifier(random_state=1693, max_depth=5, n_estimators = 1000)
+dt_class.fit(Xtrain,ytrain)
+y_pred = dt_class.predict(Xtest)
+dt_cm = confusion_matrix(ytest, y_pred)
+pd.DataFrame(dt_cm, columns=spc, index=spc)
+
+dt_class = GaussianNB()
+dt_class.fit(Xtrain,ytrain)
+y_pred = dt_class.predict(Xtest)
+dt_cm = confusion_matrix(ytest, y_pred)
+pd.DataFrame(dt_cm, columns=spc, index=spc)
+
+dt_class = DecisionTreeClassifier(random_state=1693)
+dt_class.fit(Xtrain,ytrain)
+y_pred = dt_class.predict(Xtest)
+dt_cm = confusion_matrix(ytest, y_pred)
+pd.DataFrame(dt_cm, columns=spc, index=spc)
+
+**CLASSIFICATION TREE HAD HIGHEST WITH 7**
+
+**Q5**
+
+This is choosen since testing positive means you have cancer. So that means it is malignant when in reality it is benign. Therefore the option I choose should be correct
+
+**Q6** 
+
+Naive Bayes classifiers are probabilistic classifiers due to the use of Bayes Theorem.
+
+**True**
+
+**Q7**
+
+This is the unsplitted top of the tree. Therefore it contains all data points.
+
+A root node contains all data
+
+**Q8**
+
+This form of classification is about the probability of a membership. Additionally, it can be assigned to more than one class.
+
+Soft classification is about probablility. 
+
+**Q9**
+
+According to the definitions from lecture 3, it is:
+
+The probability you are solving for, for each class.
+
+**Q10**
+
+That is what confusion matrixes do!
+
+The number of true pos, false pos, true neg and false neg
+
+**Q11**
+
+Axon is about outputs, specifically in biology it involves action potentials that eventually reach another neuron. This is all about the output!
+
+The outputs from each neuron along the synapse.
+
+**Q12**
+
+Neuron the main agent of action for the network
+
+Hidden layer a set of neurons that shares weight information
+
+Cost function this is the error compared to real data.
+
+Back propagation is infromation that reduces error and increases accuracy.
+
+Gradient descent is the method that minimizes the cost function.
+
+**Q13**
+
+*Didn't type anything here or it got deleted by accident*
+
+**Q14**
+
+dat = load_breast_cancer()
+df = pd.DataFrame(data=dat.data, columns=dat.feature_names)
+X = df[['mean radius', 'mean texture']].values
+y = dat.target
+
+kf = KFold(n_splits=10,shuffle=True,random_state=1693)
+
+model = GaussianNB()
+
+AC = []
+for idxtrain, idxtest in kf.split(X):
+  Xtrain = X[idxtrain,:]
+  Xtest = X[idxtest,:]
+  ytrain = y[idxtrain]
+  ytest = y[idxtest]
+  model.fit(Xtrain,ytrain)
+  AC.append(model.score(Xtest,ytest))
+  
+np.mean(AC)
+**0.8805137844611528**
+
+**Q15**
+dat = load_breast_cancer()
+df = pd.DataFrame(data=dat.data, columns=dat.feature_names)
+X = df[['mean radius', 'mean texture']].values
+y = dat.target
+
+kf = KFold(n_splits=10,shuffle=True,random_state=1693)
+
+model = RandomForestClassifier(random_state=1693, max_depth=7, n_estimators = 100)
+
+AC = []
+for idxtrain, idxtest in kf.split(X):
+  Xtrain = X[idxtrain,:]
+  Xtest = X[idxtest,:]
+  ytrain = y[idxtrain]
+  ytest = y[idxtest]
+  model.fit(Xtrain,ytrain)
+  AC.append(model.score(Xtest,ytest))
+  
+np.mean(AC)
+**0.8804824561403508**
+
+**Q16**
+
+dat = load_breast_cancer()
+df = pd.DataFrame(data=dat.data, columns=dat.feature_names)
+X = df[['mean radius', 'mean texture']].values
+y = dat.target
+
+scale = StandardScaler()
+
+model = Sequential()
+model.add(Dense(16,kernel_initializer='random_normal', input_dim=2, activation='relu'))
+model.add(Dense(8,kernel_initializer='random_normal', activation='relu'))
+model.add(Dense(4,kernel_initializer='random_normal', activation='relu'))
+model.add(Dense(1, activation='sigmoid'))
+model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+
+kf = KFold(n_splits=10,shuffle=True,random_state=1693)
+
+AC = []
+for idxtrain, idxtest in kf.split(X):
+  Xtrain = X[idxtrain,:]
+  Xtest  = X[idxtest,:]
+  ytrain = y[idxtrain]
+  ytest  = y[idxtest]
+  Xstrain = scale.fit_transform(Xtrain)
+  Xstest  = scale.transform(Xtest)
+  model.fit(Xstrain, ytrain, epochs=150, verbose=0,validation_split=0.25,batch_size=10,shuffle=False)
+  AC.append(acc(ytest,model.predict_classes(Xstest)))
+  print(acc(ytest,model.predict_classes(Xstest)))
+
+np.mean(AC)
+**0.8893170426065163**
