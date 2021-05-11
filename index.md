@@ -1299,7 +1299,7 @@ Since maximum depth, min node size, and learning rate are tuning parameters due 
 **Q9**
 All of these statements are true besides the none are correct.
 
-**Therefore "All of these answers are correct."
+**Therefore "All of these answers are correct."**
 
 **10**
 
@@ -1309,7 +1309,7 @@ A parsimonius model uses feature selection to reduce the number of features to a
 
 PCA determines what vectors we maximize the variance of the output features. 
 
-**Therefore "Determining the directions along which we maximize the variance of the input features."
+**Therefore "Determining the directions along which we maximize the variance of the input features."**
 
 **Q12**
 
