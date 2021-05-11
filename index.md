@@ -1071,3 +1071,263 @@ for idxtrain, idxtest in kf.split(X):
 
 np.mean(AC)
 **0.8893170426065163**
+
+# Lab 7
+
+**Q1**
+
+columns =  'age gender bmi map tc ldl hdl tch ltg glu' .split()  
+diabetes = datasets.load_diabetes()  
+df = pd.DataFrame(diabetes.data, columns=columns)  
+y = diabetes.target  
+X = pd.DataFrame(diabetes.data, columns=data.feature_names)
+
+model = RandomForestRegressor(random_state=310, max_depth=10, n_estimators = 1000)
+model.fit(X,y)
+
+features = df.columns
+importances = model.feature_importances_
+indices = np.argsort(importances)[-9:] 
+plt.title('Feature Importances')
+plt.barh(range(len(indices)), importances[indices], color='b', align='center')
+plt.yticks(range(len(indices)), [features[i] for i in indices])
+plt.xlabel('Relative Importance')
+plt.show()
+
+![image](https://user-images.githubusercontent.com/78627324/117750102-d9374200-b1e0-11eb-96be-273fa26e1138.png)
+
+**Q2**
+
+result = stepwise_selection(X,y,[],0.001,0.001)
+/usr/local/lib/python3.7/dist-packages/ipykernel_launcher.py:25: DeprecationWarning: The default dtype for empty Series will be 'object' instead of 'float64' in a future version. Specify a dtype explicitly to silence this warning.
+
+Add  bmi                            with p-value 3.46601e-42
+Add  s5                             with p-value 3.03968e-20
+Add  bp                             with p-value 3.74192e-05
+
+result
+**['bmi', 'ltg', 'map']**
+
+**Q3**
+
+scale = StandardScaler()
+Xs = scale.fit_transform(X)
+X.shape[1]
+
+model = lm.ElasticNet(alpha=0.25,l1_ratio = 0.5)
+model.fit(Xs,y)
+model.coef_
+
+v = -np.sort(-np.abs(model.coef_))
+for i in range(X.shape[1]):
+  print(X.columns[np.abs(model.coef_)==v[i]])
+  
+**Index(['bmi'], dtype='object')**
+**Index(['ltg'], dtype='object')**
+**Index(['map'], dtype='object')**
+
+**Q4**
+
+A k-fold cross-validation can be used to determine the best choice of hyper-parameters from a finite set of choices. 
+
+**Therefore it is true**
+
+**Q5**
+#Had to use work from data 146 for this problem hence the long function:
+def DoKFold(model,X,y,k,random_state=1693,scaler=None):
+    '''Function will perform K-fold validation and return a list of K training and testing scores, inclduing R^2 as well as MSE.
+    
+        Inputs:
+            model: An sklearn model with defined 'fit' and 'score' methods
+            X: An N by p array containing the features of the model. The N rows are observations, and the p columns are features.
+            y: An array of length N containing the target of the model
+            k: The number of folds to split the data into for K-fold validation
+            random_state: used when splitting the data into the K folds (default=146)
+            scaler: An sklearn feature scaler.  If none is passed, no feature scaling will be performed
+        Outputs:
+            train_scores: A list of length K containing the training scores
+            test_scores: A list of length K containing the testing scores
+            train_mse: A list of length K containing the MSE on training data
+            test_mse: A list of length K containing the MSE on testing data
+    '''
+    
+    from sklearn.model_selection import KFold
+    kf = KFold(n_splits=k,shuffle=True,random_state=random_state)
+    
+    train_scores=[]
+    test_scores=[]
+    train_mse=[]
+    test_mse=[]
+    
+    for idxTrain, idxTest in kf.split(X):
+        Xtrain = X[idxTrain,:]
+        Xtest = X[idxTest,:]
+        ytrain = y[idxTrain]
+        ytest = y[idxTest]
+        
+        if scaler != None:
+            Xtrain = scaler.fit_transform(Xtrain)
+            Xtest = scaler.transform(Xtest)
+        
+        model.fit(Xtrain,ytrain)
+        
+        train_scores.append(model.score(Xtrain,ytrain))
+        test_scores.append(model.score(Xtest,ytest))
+        
+        # Compute the mean squared errors
+        ytrain_pred = model.predict(Xtrain)
+        ytest_pred = model.predict(Xtest)
+        train_mse.append(np.mean((ytrain-ytrain_pred)**2))
+        test_mse.append(np.mean((ytest-ytest_pred)**2))
+        
+    return train_scores,test_scores,train_mse,test_mse
+
+def GetColors(N, map_name='rainbow'):
+    '''Function returns a list of N colors from a matplotlib colormap
+            Input: N = number of colors, and map_name = name of a matplotlib colormap
+    
+            For a list of available colormaps: 
+                https://matplotlib.org/3.1.1/gallery/color/colormap_reference.html
+    '''
+    
+    import matplotlib
+    import numpy as np
+    cmap = matplotlib.cm.get_cmap(map_name)
+    n = np.linspace(0,N,N)/N
+    return cmap(n)
+
+def PlotGroups(points, groups, colors, ec='black', ax='None'):
+    '''Function makes a scatter plot, given:
+            Input:  points (array)
+                    groups (an integer label for each point)
+                    colors (one rgb tuple for each group)
+                    ec (edgecolor for markers, default is black)
+                    ax (optional handle to an existing axes object to add the new plot on top of)
+            Output: handles to the figure (fig) and axes (ax) objects
+    '''
+    import matplotlib.pyplot as plt
+    # Create a new figure if none was passed
+    if ax == 'None':
+        fig,ax = plt.subplots()
+    else:
+        fig = plt.gcf()
+        
+    for i in np.unique(groups):
+        idx = (groups==i)
+        ax.scatter(points[idx,0], points[idx,1],
+                    color=colors[i],edgecolor=ec,
+                    label = 'Group ' + str(i),alpha=0.5)
+    ax.set_xlabel('$x_1$')
+    ax.set_ylabel('$x_2$')
+    ax.legend(bbox_to_anchor=[1,0.5],loc='center left')
+    return fig,ax
+
+def CompareClasses(actual, predicted, names=None):
+    '''Function returns a confusion matrix, and overall accuracy given:
+            Input:  actual - a list of actual classifications
+                    predicted - a list of predicted classifications
+                    names (optional) - a list of class names
+    '''
+    
+    import pandas as pd
+    accuracy = sum(actual==predicted)/actual.shape[0]
+    classes = pd.DataFrame(columns=['Actual','Predicted'])
+    classes['Actual'] = actual
+    classes['Predicted'] = predicted
+    conf_mat = pd.crosstab(classes['Predicted'],classes['Actual'])
+    # Relabel the rows/columns if names was provided
+    if type(names) != type(None):
+        conf_mat.index=y_names
+        conf_mat.index.name='Predicted'
+        conf_mat.columns=y_names
+        conf_mat.columns.name = 'Actual'
+    print('Accuracy = ' + format(accuracy, '.2f'))
+    return conf_mat, accuracy
+def MakeGrid(x_range,y_range):
+    '''Function will take a list of x values and a list of y values, 
+    and return a list of points in a grid defined by the two ranges'''
+    import numpy as np
+    xx,yy = np.meshgrid(x_range,y_range)
+    points = np.vstack([xx.ravel(), yy.ravel()]).T
+    return points
+
+kf = KFold(n_splits=10,shuffle=True,random_state=1693)
+
+d_range = np.arange(1,100)
+k=10
+train = []
+test = []
+for d in d_range:
+    dtc = DTC(random_state=146, max_depth = d)
+    tr,te,_,_ = DoKFold(dtc,X,y,k)
+    train.append(np.mean(tr))
+    test.append(np.mean(te))
+  
+plt.plot(d_range, train, '-xk', label='Training')
+plt.plot(d_range, test, '-xr', label='Testing')
+plt.xlabel('Max Depth')
+plt.ylabel('Classification Accuracy')
+plt.legend()
+plt.show()
+
+![image](https://user-images.githubusercontent.com/78627324/117750720-e0ab1b00-b1e1-11eb-936e-c096b1105956.png)
+
+l_range = np.arange(1,25)
+k=10
+train = []
+test = []
+for l in l_range:
+    dtc = DTC(random_state=146, min_samples_leaf = l)
+    tr,te,_,_ = DoKFold(dtc,X,y,k)
+    train.append(np.mean(tr))
+    test.append(np.mean(te))
+ 
+ plt.plot(l_range, train, '-xk', label='Training')
+plt.plot(l_range, test, '-xr', label='Testing')
+plt.xlabel('Min Leaf')
+plt.ylabel('Classification Accuracy')
+plt.legend()
+plt.show()
+
+![image](https://user-images.githubusercontent.com/78627324/117750764-fae4f900-b1e1-11eb-9cf3-07bd3dd0ebab.png)
+
+**Q8** 
+
+Since maximum depth, min node size, and learning rate are tuning parameters due to how they effect the funtion.
+**Tuning**
+
+**Q9**
+All of these statements are true besides the none are correct.
+
+**Therefore "All of these answers are correct."
+
+**10**
+
+A parsimonius model uses feature selection to reduce the number of features to as few as possible. It fits this defintion.
+
+**Q11**
+
+PCA determines what vectors we maximize the variance of the output features. 
+
+**Therefore "Determining the directions along which we maximize the variance of the input features."
+
+**Q12**
+
+kf = KFold(n_splits=10,shuffle=True,random_state=1693)
+
+dt_class = DecisionTreeClassifier(random_state=1234,max_depth=10,min_samples_leaf=20)
+dt_class.fit(X,y)
+from sklearn.decomposition import PCA
+pca = PCA(n_components=2)
+pca.fit(X)
+y_pred = dt_class.predict(X)
+dt_cm = confusion_matrix(y, y_pred)
+pd.DataFrame(dt_cm, columns=spc, index=spc)
+
+![image](https://user-images.githubusercontent.com/78627324/117751058-75ae1400-b1e2-11eb-9dea-95a5d7cbc7af.png)
+
+**Aproximately 192**
+
+# Thank you note
+
+**Dear Dr. Vasiliu this is the last class I need for my data science minor. Thank you for being a wonderful professor. This class was a great note to end on. Thank you! :)**
