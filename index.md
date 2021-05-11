@@ -1072,7 +1072,7 @@ for idxtrain, idxtest in kf.split(X):
 np.mean(AC)
 **0.8893170426065163**
 
-# Lab 7
+# Lab 07
 
 **Q1**
 
